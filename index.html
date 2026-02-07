@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Investment Analysis Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        .timeline-point:hover { transform: scale(1.1); }
+        .active-point { background-color: #3b82f6; border-color: #1d4ed8; color: white; transform: scale(1.15); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .nav-btn.active { background-color: #f1f5f9; color: #1e293b; border-bottom: 3px solid #3b82f6; }
+        .nav-btn { color: #64748b; border-bottom: 3px solid transparent; }
+        .nav-btn:hover { color: #334155; }
+        .hidden { display: none; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex flex-col">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">⚛️</span>
+                    <h1 class="text-xl font-bold text-slate-800 hidden sm:block">Nuclear Investment Tools</h1>
+                </div>
+                <div class="flex space-x-1 sm:space-x-4">
+                    <button onclick="switchApp('portfolio')" id="btn-nav-portfolio" class="nav-btn active px-3 py-2 font-semibold transition-colors duration-200">
+                        📊 Portfolio
+                    </button>
+                    <button onclick="switchApp('cost')" id="btn-nav-cost" class="nav-btn px-3 py-2 font-semibold transition-colors duration-200">
+                        💰 Cost Analysis
+                    </button>
+                    <button onclick="switchApp('timeline')" id="btn-nav-timeline" class="nav-btn px-3 py-2 font-semibold transition-colors duration-200">
+                        🗓️ Timeline
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-4 sm:p-8">
+        <div class="max-w-5xl mx-auto">
+
+            <div id="app-portfolio" class="app-section block animate-fade-in">
+                <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+                    <div class="mb-6 text-center">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">☢️ จำลองพอร์ตการลงทุน</h2>
+                        <p class="text-slate-500">เลือกความเสี่ยงของคุณเพื่อดูสัดส่วนการลงทุนที่แนะนำ</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 mb-8 justify-center">
+                        <button onclick="updatePortfolio('conservative')" class="px-5 py-2 rounded-full bg-green-100 text-green-700 font-semibold hover:bg-green-200 focus:ring-2 ring-green-500 transition">🐢 Conservative</button>
+                        <button onclick="updatePortfolio('moderate')" class="px-5 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 focus:ring-2 ring-blue-500 transition">⚖️ Moderate</button>
+                        <button onclick="updatePortfolio('aggressive')" class="px-5 py-2 rounded-full bg-red-100 text-red-700 font-semibold hover:bg-red-200 focus:ring-2 ring-red-500 transition">🚀 Aggressive</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="relative h-64 w-full">
+                            <canvas id="portfolioChart"></canvas>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                            <h3 id="profileTitle" class="text-xl font-bold text-slate-700 mb-3">Moderate</h3>
+                            <ul id="allocationList" class="space-y-2 text-slate-600 mb-4">
+                                </ul>
+                            <div class="text-sm italic text-slate-500 bg-white p-3 rounded border border-slate-100">
+                                <span id="profileDesc"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="app-cost" class="app-section hidden animate-fade-in">
+                <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">💰 สงครามราคา: ต้นทุนการก่อสร้าง</h2>
+                        <p class="text-gray-600">เปรียบเทียบต้นทุนโรงไฟฟ้าต่อกิโลวัตต์ (USD/kW)</p>
+                    </div>
+
+                    <div class="h-80 w-full mb-8">
+                        <canvas id="costChart"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                            <h4 class="font-bold text-red-700">🇺🇸 สหรัฐฯ</h4>
+                            <p class="text-2xl font-bold text-gray-800">$15,000</p>
+                            <p class="text-xs text-gray-500">แพงที่สุด (Plant Vogtle)</p>
+                        </div>
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <h4 class="font-bold text-yellow-700">🎯 SMR เป้าหมาย</h4>
+                            <p class="text-2xl font-bold text-gray-800">$6,000</p>
+                            <p class="text-xs text-gray-500">หลัง Mass Production</p>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <h4 class="font-bold text-green-700">🇨🇳 จีน</h4>
+                            <p class="text-2xl font-bold text-gray-800">$2,500</p>
+                            <p class="text-xs text-gray-500">ถูกที่สุด & สร้างเร็วสุด</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="app-timeline" class="app-section hidden animate-fade-in">
+                <div class="bg-slate-800 rounded-xl shadow-2xl overflow-hidden text-white">
+                    <div class="p-6 border-b border-slate-700 bg-slate-900">
+                        <h2 class="text-2xl font-bold text-blue-400">📅 Nuclear & AI Timeline</h2>
+                        <p class="text-slate-400 text-sm">คลิกที่ปีเพื่อดูเหตุการณ์สำคัญ (Catalysts)</p>
+                    </div>
+
+                    <div class="relative px-4 sm:px-10 py-10 bg-slate-800">
+                        <div class="absolute top-1/2 left-4 sm:left-10 right-4 sm:right-10 h-1 bg-slate-600 -z-0 transform -translate-y-1/2"></div>
+                        
+                        <div class="flex justify-between relative z-10 max-w-2xl mx-auto">
+                            <button onclick="updateTimeline('2025')" id="t-btn-2025" class="timeline-point w-12 h-12 rounded-full bg-slate-700 border-4 border-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">25</button>
+                            <button onclick="updateTimeline('2026')" id="t-btn-2026" class="timeline-point w-12 h-12 rounded-full bg-slate-700 border-4 border-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">26</button>
+                            <button onclick="updateTimeline('2027')" id="t-btn-2027" class="timeline-point w-12 h-12 rounded-full bg-slate-700 border-4 border-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">27</button>
+                            <button onclick="updateTimeline('2029')" id="t-btn-2029" class="timeline-point w-12 h-12 rounded-full bg-slate-700 border-4 border-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">29+</button>
+                        </div>
+                    </div>
+
+                    <div class="p-8 bg-slate-900 min-h-[280px]">
+                        <div id="timeline-content" class="transition-opacity duration-300">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-white py-4 mt-auto border-t border-slate-200">
+        <div class="text-center text-slate-400 text-sm">
+            Based on MIT Technology Review Analysis • Generated by AI
+        </div>
+    </footer>
+
+    <script>
+        // --- NAVIGATION LOGIC ---
+        function switchApp(appId) {
+            // Hide all sections
+            document.querySelectorAll('.app-section').forEach(el => el.classList.add('hidden'));
+            // Show selected section
+            document.getElementById('app-' + appId).classList.remove('hidden');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-nav-' + appId).classList.add('active');
+        }
+
+        // --- APP 1: PORTFOLIO LOGIC ---
+        const ctxPortfolio = document.getElementById('portfolioChart').getContext('2d');
+        let portfolioChart;
+
+        const portfolioData = {
+            conservative: {
+                label: 'Conservative (เสี่ยงต่ำ)',
+                data: [60, 30, 10],
+                labels: ['Big Tech (Microsoft, Amazon)', 'Utility Companies', 'Uranium ETF'],
+                colors: ['#4ade80', '#22c55e', '#166534'],
+                desc: "เน้นบริษัทใหญ่ที่มีรายได้มั่นคงและจ่ายปันผล ลดความเสี่ยงจากความล้มเหลวของเทคโนโลยี SMR โดยตรง"
+            },
+            moderate: {
+                label: 'Moderate (ปานกลาง)',
+                data: [40, 30, 20, 10],
+                labels: ['Big Tech', 'Nuclear ETFs', 'Uranium Miners', 'SMR Developers'],
+                colors: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'],
+                desc: "สมดุลระหว่างความมั่นคงของ Big Tech และโอกาสเติบโตจากบริษัทเหมืองยูเรเนียมและ ETF"
+            },
+            aggressive: {
+                label: 'Aggressive (เสี่ยงสูง)',
+                data: [50, 30, 20],
+                labels: ['SMR Companies (Kairos, X-Energy)', 'Uranium/HALEU Miners', 'Supply Chain & Construction'],
+                colors: ['#f87171', '#ef4444', '#b91c1c'],
+                desc: "เดิมพันสูงกับผู้พัฒนาเทคโนโลยีโดยตรง มีโอกาสกำไรมหาศาลหากสำเร็จ แต่เสี่ยงเป็นศูนย์หากล้มเหลว"
+            }
+        };
+
+        function initPortfolioChart() {
+            portfolioChart = new Chart(ctxPortfolio, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{ data: [], backgroundColor: [] }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+            updatePortfolio('moderate');
+        }
+
+        function updatePortfolio(profile) {
+            const selected = portfolioData[profile];
+            
+            portfolioChart.data.labels = selected.labels;
+            portfolioChart.data.datasets[0].data = selected.data;
+            portfolioChart.data.datasets[0].backgroundColor = selected.colors;
+            portfolioChart.update();
+
+            document.getElementById('profileTitle').innerText = selected.label;
+            document.getElementById('profileDesc').innerText = "💡 " + selected.desc;
+            
+            const listHtml = selected.labels.map((label, index) => 
+                `<li class="flex justify-between items-center text-sm sm:text-base">
+                    <span>${label}</span>
+                    <span class="font-bold bg-slate-100 px-2 py-1 rounded">${selected.data[index]}%</span>
+                </li>`
+            ).join('');
+            document.getElementById('allocationList').innerHTML = listHtml;
+        }
+
+        // --- APP 2: COST LOGIC ---
+        function initCostChart() {
+            const ctxCost = document.getElementById('costChart').getContext('2d');
+            new Chart(ctxCost, {
+                type: 'bar',
+                data: {
+                    labels: ['โรงไฟฟ้าก๊าซ (พื้นฐาน)', 'จีน (Nuclear)', 'SMR (เป้าหมาย)', 'SMR (รุ่นแรก)', 'สหรัฐฯ (Nuclear เดิม)'],
+                    datasets: [{
+                        label: 'ต้นทุนก่อสร้าง ($/kW)',
+                        data: [1600, 2500, 6000, 10000, 15000],
+                        backgroundColor: ['#9ca3af', '#22c55e', '#eab308', '#f97316', '#ef4444'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ctx.raw.toLocaleString() + ' USD/kW' } }
+                    },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // --- APP 3: TIMELINE LOGIC ---
+        const timelineData = {
+            '2025': {
+                title: "🇨🇳 2025: ปีแห่งมังกร (China's Lead)",
+                desc: "จีนเปิดโรงไฟฟ้า SMR เชิงพาณิชย์แห่งแรก (Sodium Gas Reactor) เริ่มเดินเครื่องจริง",
+                impact: "หุ้นนิวเคลียร์จีนอาจพุ่งสูง / ตะวันตกเริ่มตื่นตัวเรื่องเทคโนโลยีที่ตามหลัง",
+                color: "text-red-400"
+            },
+            '2026': {
+                title: "🏗️ 2026: Hyperscale Begins",
+                desc: "Data Centers รุ่นใหม่เริ่มก่อสร้าง ต้องการไฟฟ้ามหาศาล (Hundreds of MW)",
+                impact: "หุ้นก่อสร้าง (Fluor, Bechtel) ได้ประโยชน์ / Microsoft/Amazon ประกาศดีลพลังงานเพิ่ม",
+                color: "text-blue-400"
+            },
+            '2027': {
+                title: "🧪 2027: The Acid Test",
+                desc: "Kairos Power เริ่มเดินเครื่อง Demonstration Reactor / Microsoft อาจเริ่มใช้ไฟจาก Three Mile Island",
+                impact: "จุดวัดใจ: ถ้าสำเร็จหุ้น SMR พุ่ง (To the moon) ถ้าล้มเหลวตลาดเทขาย",
+                color: "text-yellow-400"
+            },
+            '2029': {
+                title: "🚀 2029+: Scale or Fail",
+                desc: "SMRs เริ่มผลิต Mass Production ต้นทุนควรลดลง 40% หรืออาจเจอปัญหา Supply Chain",
+                impact: "ช่วงเก็บเกี่ยวผลตอบแทนระยะยาว หรือวิกฤตหากต้นทุนไม่ลดลง",
+                color: "text-green-400"
+            }
+        };
+
+        function updateTimeline(year) {
+            // Reset buttons
+            document.querySelectorAll('.timeline-point').forEach(btn => {
+                btn.classList.remove('active-point');
+                btn.classList.add('bg-slate-700', 'border-slate-500');
+            });
+
+            // Active button
+            const activeBtn = document.getElementById(`t-btn-${year}`);
+            if(activeBtn) {
+                activeBtn.classList.add('active-point');
+                activeBtn.classList.remove('bg-slate-700', 'border-slate-500');
+            }
+
+            // Update Content
+            const info = timelineData[year];
+            const contentArea = document.getElementById('timeline-content');
+            
+            contentArea.style.opacity = 0;
+            setTimeout(() => {
+                contentArea.innerHTML = `
+                    <h3 class="text-2xl sm:text-3xl font-bold ${info.color} mb-4">${info.title}</h3>
+                    <div class="bg-slate-700/50 p-4 rounded-lg border-l-4 border-white mb-4">
+                        <p class="text-lg text-white">${info.desc}</p>
+                    </div>
+                    <div>
+                        <span class="bg-blue-900 text-blue-200 text-xs font-bold px-2 py-1 rounded uppercase">Market Impact</span>
+                        <p class="text-slate-300 mt-2">${info.impact}</p>
+                    </div>
+                `;
+                contentArea.style.opacity = 1;
+            }, 150);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            initPortfolioChart();
+            initCostChart();
+            updateTimeline('2025');
+        };
+
+    </script>
+</body>
+</html>
