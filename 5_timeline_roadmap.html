@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Technology Roadmap | Roadmap เทคโนโลยีนิวเคลียร์</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tab-btn {
+            padding: 12px 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .timeline-container {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .timeline-item.left {
+            justify-content: flex-end;
+            padding-right: calc(50% + 40px);
+        }
+        
+        .timeline-item.right {
+            justify-content: flex-start;
+            padding-left: calc(50% + 40px);
+        }
+        
+        .timeline-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+            position: relative;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-content:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 25px;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover .timeline-dot {
+            width: 40px;
+            height: 40px;
+            top: 20px;
+        }
+        
+        .timeline-year {
+            position: absolute;
+            left: 50%;
+            top: 10px;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+            z-index: 5;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .timeline-content h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .timeline-content p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .company-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #edf2f7;
+            color: #4a5568;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-badge.completed {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status-badge.ongoing {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .status-badge.planned {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .status-badge.uncertain {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .impact-meter {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .impact-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+        
+        .impact-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .impact-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 968px) {
+            .timeline-line {
+                left: 30px;
+            }
+            
+            .timeline-item.left,
+            .timeline-item.right {
+                justify-content: flex-start;
+                padding-left: 70px;
+                padding-right: 0;
+            }
+            
+            .timeline-year {
+                left: 30px;
+            }
+            
+            .timeline-dot {
+                left: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗓️ Nuclear Technology Roadmap</h1>
+        <p class="subtitle">Timeline และ Milestones การพัฒนาพลังงานนิวเคลียร์รุ่นใหม่</p>
+        
+        <div class="filter-tabs">
+            <button class="tab-btn active" onclick="filterTimeline('all')">ทั้งหมด</button>
+            <button class="tab-btn" onclick="filterTimeline('us')">🇺🇸 สหรัฐฯ</button>
+            <button class="tab-btn" onclick="filterTimeline('china')">🇨🇳 จีน</button>
+            <button class="tab-btn" onclick="filterTimeline('commercial')">เชิงพาณิชย์</button>
+            <button class="tab-btn" onclick="filterTimeline('research')">วิจัยพัฒนา</button>
+        </div>
+        
+        <div class="timeline-container" id="timelineContainer">
+            <div class="timeline-line"></div>
+            
+            <!-- 2024 -->
+            <div class="timeline-year" style="top: 0;">2024</div>
+            
+            <div class="timeline-item left" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🇺🇸 Plant Vogtle Unit 4 Online</h3>
+                    <p>โรงไฟฟ้านิวเคลียร์แห่งใหม่ล่าสุดในสหรัฐฯ เปิดใช้งาน แต่ใช้เวลา 15+ ปี และเกินงบประมาณมหาศาล ($15,000/kW)</p>
+                    <div class="company-badge">Southern Company</div>
+                    <div class="status-badge completed">✓ เสร็จสิ้น</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <div class="timeline-item right" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🔄 Microsoft - Three Mile Island Deal</h3>
+                    <p>Microsoft ทำข้อตกลงเปิดโรงไฟฟ้า Three Mile Island ที่เคยปิดตัวกลับมาใช้งาน เพื่อจ่ายไฟให้ Data Centers</p>
+                    <div class="company-badge">Microsoft</div>
+                    <div class="company-badge">Constellation Energy</div>
+                    <div class="status-badge ongoing">⏳ ดำเนินการ</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 85%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <!-- 2025 -->
+            <div class="timeline-year" style="top: 350px;">2025</div>
+            
+            <div class="timeline-item left" data-country="china" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🇨🇳 China First Commercial SMR</h3>
+                    <p>Chinese National Nuclear Corporation วางแผนเปิดโรงไฟฟ้า SMR เชิงพาณิชย์แห่งแรก (Sodium gas reactor) ในช่วงครึ่งปีแรก - จุดเปลี่ยนสำคัญของอุตสาหกรรม</p>
+                    <div class="company-badge">CNNC</div>
+                    <div class="status-badge planned">📅 วางแผน Q1-Q2</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <div class="timeline-item right" data-country="us" data-type="research">
+                <div class="timeline-content">
+                    <h3>🔬 HALEU Production Begins</h3>
+                    <p>Centrus Energy เริ่มผลิต HALEU fuel ในสหรัฐฯ เพื่อลดการพึ่งพารัสเซีย - สำคัญสำหรับ supply chain independence</p>
+                    <div class="company-badge">Centrus Energy</div>
+                    <div class="company-badge">US DOE</div>
+                    <div class="status-badge ongoing">⏳ เริ่มแล้ว</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <!-- 2026 -->
+            <div class="timeline-year" style="top: 700px;">2026</div>
+            
+            <div class="timeline-item left" data-country="us" data-type="research">
+                <div class="timeline-content">
+                    <h3>🏗️ Multiple SMR Construction Starts</h3>
+                    <p>Kairos Power, X-Energy และบริษัทอื่นๆ เริ่มก่อสร้างเครื่องปฏิกรณ์ demonstration - "steel in the ground" moment</p>
+                    <div class="company-badge">Kairos Power</div>
+                    <div class="company-badge">X-Energy</div>
+                    <div class="status-badge planned">📅 คาดว่าจะเริ่ม</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 80%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <!-- 2027 -->
+            <div class="timeline-year" style="top: 950px;">2027</div>
+            
+            <div class="timeline-item right" data-country="us" data-type="research">
+                <div class="timeline-content">
+                    <h3>⚗️ Kairos Power Demonstration Reactor</h3>
+                    <p>Kairos Power กำหนดเปิด demonstration reactor ของ molten salt technology - ทดสอบเทคโนโลยีจริงครั้งแรก</p>
+                    <div class="company-badge">Kairos Power</div>
+                    <div class="status-badge planned">📅 Target 2027</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <div class="timeline-item left" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🏭 X-Energy Texas Project</h3>
+                    <p>X-Energy ร่วมกับโรงงานเคมีในเท็กซัส นำร่อง SMR co-located กับโรงงานอุตสาหกรรม</p>
+                    <div class="company-badge">X-Energy</div>
+                    <div class="status-badge planned">📅 Target 2027-2028</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <!-- 2028-2030 -->
+            <div class="timeline-year" style="top: 1300px;">2028</div>
+            
+            <div class="timeline-item right" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>⚡ First Commercial SMR Electricity</h3>
+                    <p>Kairos Power คาดว่าจะเริ่มผลิตไฟฟ้าเชิงพาณิชย์จริง - เครื่องปฏิกรณ์ molten salt แห่งแรกที่จ่ายไฟเข้าเครือข่าย</p>
+                    <div class="company-badge">Kairos Power</div>
+                    <div class="status-badge planned">📅 Target 2028-2030</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <div class="timeline-item left" data-country="china" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🇨🇳 China SMR Mass Production</h3>
+                    <p>จีนเริ่ม mass production SMRs ต้นทุนลดลงเหลือ $2,000-3,000/kW ครองตลาดโลก</p>
+                    <div class="company-badge">CNNC</div>
+                    <div class="company-badge">CGN</div>
+                    <div class="status-badge planned">📅 คาดว่า 2028-2030</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <!-- 2030s -->
+            <div class="timeline-year" style="top: 1650px;">2030+</div>
+            
+            <div class="timeline-item right" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>📈 Mass Production Era Begins</h3>
+                    <p>SMRs เริ่มแพร่หลาย ต้นทุนลดลง 40% จาก mass production ถึงจุดเปลี่ยนสำคัญของอุตสาหกรรม</p>
+                    <div class="company-badge">Multiple Companies</div>
+                    <div class="status-badge planned">📅 2030-2035</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            
+            <div class="timeline-item left" data-country="us" data-type="commercial">
+                <div class="timeline-content">
+                    <h3>🌍 Global Nuclear Renaissance</h3>
+                    <p>พลังงานนิวเคลียร์รุ่นใหม่กลายเป็นหลักในการต่อสู้กับ climate change ต้นทุนแข่งขันได้กับพลังงานหมุนเวียน</p>
+                    <div class="company-badge">Global</div>
+                    <div class="status-badge uncertain">❓ ขึ้นกับหลายปัจจัย</div>
+                    <div class="impact-meter">
+                        <div class="impact-label">Investment Impact</div>
+                        <div class="impact-bar">
+                            <div class="impact-bar-fill" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+        </div>
+        
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #c6f6d5;"></div>
+                <span>เสร็จสิ้น</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #feebc8;"></div>
+                <span>ดำเนินการ</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #bee3f8;"></div>
+                <span>วางแผน</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #fed7d7;"></div>
+                <span>ไม่แน่นอน</span>
+            </div>
+        </div>
+        
+        <!-- Key Dates Summary -->
+        <div style="background: #edf2f7; padding: 25px; border-radius: 15px; margin-top: 30px;">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">📅 Key Dates สำหรับนักลงทุน:</h3>
+            <ul style="margin-left: 20px; color: #4a5568;">
+                <li style="margin-bottom: 10px;"><strong>2025 Q1-Q2:</strong> 🇨🇳 จีนเปิด Commercial SMR → พิสูจน์เทคโนโลยี, หุ้นจีนน่าสนใจ</li>
+                <li style="margin-bottom: 10px;"><strong>2027:</strong> 🇺🇸 Kairos demonstration reactor → ทดสอบ molten salt, critical milestone</li>
+                <li style="margin-bottom: 10px;"><strong>2028:</strong> ⚡ First commercial electricity → ถ้าสำเร็จ valuations พุ่ง</li>
+                <li style="margin-bottom: 10px;"><strong>2030+:</strong> 📈 Mass production → ต้นทุนลด, margins ขึ้น, scaling begins</li>
+            </ul>
+        </div>
+        
+        <!-- Risk Timeline -->
+        <div style="background: #fed7d7; border-left: 4px solid #f56565; padding: 25px; border-radius: 15px; margin-top: 20px;">
+            <h3 style="color: #c53030; margin-bottom: 15px;">⚠️ Risk Events ที่ต้องระวัง:</h3>
+            <ul style="margin-left: 20px; color: #742a2a;">
+                <li style="margin-bottom: 10px;"><strong>2025-2027:</strong> Construction delays, cost overruns → ราคาหุ้นผันผวน</li>
+                <li style="margin-bottom: 10px;"><strong>2027:</strong> Demo reactor failures → เทคโนโลยีไม่ได้ผล, วิกฤตความเชื่อมั่น</li>
+                <li style="margin-bottom: 10px;"><strong>2028:</strong> Regulatory changes (Trump admin issues) → ความเสี่ยงด้านความปลอดภัย</li>
+                <li style="margin-bottom: 10px;"><strong>2030+:</strong> Competition from renewables + storage → ถ้าถูกเกินไป SMRs ไม่แข่งขันได้</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function filterTimeline(filter) {
+            const items = document.querySelectorAll('.timeline-item');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter items
+            items.forEach(item => {
+                if (filter === 'all') {
+                    item.style.display = 'flex';
+                } else if (filter === 'us') {
+                    item.style.display = item.dataset.country === 'us' ? 'flex' : 'none';
+                } else if (filter === 'china') {
+                    item.style.display = item.dataset.country === 'china' ? 'flex' : 'none';
+                } else if (filter === 'commercial') {
+                    item.style.display = item.dataset.type === 'commercial' ? 'flex' : 'none';
+                } else if (filter === 'research') {
+                    item.style.display = item.dataset.type === 'research' ? 'flex' : 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

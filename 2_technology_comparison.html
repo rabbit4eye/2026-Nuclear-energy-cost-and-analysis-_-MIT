@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Technology Comparison | เปรียบเทียบเทคโนโลยีนิวเคลียร์</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .tech-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .tech-card.selected {
+            border-color: #667eea;
+        }
+        
+        .tech-card-header {
+            padding: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .tech-card-body {
+            padding: 20px;
+        }
+        
+        .tech-card.conventional .tech-card-header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+        
+        .tech-card.smr .tech-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tech-card.molten-salt .tech-card-header {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .tech-card.sodium .tech-card-header {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .tech-card.micro .tech-card-header {
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+        }
+        
+        .tech-card.haleu .tech-card-header {
+            background: linear-gradient(135deg, #ed64a6 0%, #d53f8c 100%);
+        }
+        
+        .spec-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .spec-item:last-child {
+            border-bottom: none;
+        }
+        
+        .spec-label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .spec-value {
+            font-size: 1.1em;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .badge.pro {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .badge.con {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .badge.neutral {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .comparison-matrix {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .matrix-title {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .matrix-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .matrix-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .matrix-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .rating {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .star {
+            width: 20px;
+            height: 20px;
+            background: #cbd5e0;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+        
+        .star.filled {
+            background: #fbbf24;
+        }
+        
+        .timeline-container {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        
+        .timeline-year {
+            min-width: 80px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .timeline-content h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-content p {
+            color: #718096;
+            line-height: 1.6;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .matrix-table {
+                font-size: 0.9em;
+            }
+            
+            .matrix-table th,
+            .matrix-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚛️ Nuclear Technology Comparison</h1>
+        <p class="subtitle">เปรียบเทียบเทคโนโลยีนิวเคลียร์รุ่นต่างๆ แบบ Interactive</p>
+        
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="filterTech('all')">แสดงทั้งหมด</button>
+            <button class="filter-btn" onclick="filterTech('commercial')">เชิงพาณิชย์</button>
+            <button class="filter-btn" onclick="filterTech('development')">กำลังพัฒนา</button>
+            <button class="filter-btn" onclick="filterTech('experimental')">ทดลอง</button>
+        </div>
+        
+        <!-- Technology Cards -->
+        <div class="tech-grid" id="techGrid">
+            <!-- Conventional Nuclear -->
+            <div class="tech-card conventional" data-status="commercial">
+                <div class="tech-card-header">
+                    ⚡ Conventional Nuclear
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">กำลังผลิต</div>
+                        <div class="spec-value">1,000-2,000 MW</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ขนาดถังบรรจุ</div>
+                        <div class="spec-value">~140 ฟุต</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สารทำความเย็น</div>
+                        <div class="spec-value">น้ำ (แรงดันสูง)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ต้นทุนต่อ kW</div>
+                        <div class="spec-value">$15,000 (US)</div>
+                        <span class="badge con">แพงมาก</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">เวลาก่อสร้าง</div>
+                        <div class="spec-value">10-20 ปี</div>
+                        <span class="badge con">ช้า</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สถานะ</div>
+                        <span class="badge neutral">เชิงพาณิชย์</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Small Modular Reactors -->
+            <div class="tech-card smr" data-status="development">
+                <div class="tech-card-header">
+                    🔷 Small Modular Reactors (SMRs)
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">กำลังผลิต</div>
+                        <div class="spec-value">&lt;300 MW</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ขนาดถังบรรจุ</div>
+                        <div class="spec-value">~15 ฟุต</div>
+                        <span class="badge pro">เล็กกว่า 90%</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">การผลิต</div>
+                        <div class="spec-value">Modular (โรงงาน)</div>
+                        <span class="badge pro">สร้างง่าย</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ต้นทุนต่อ kW</div>
+                        <div class="spec-value">$6,000-10,000</div>
+                        <span class="badge pro">ถูกกว่า 40%</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">บริษัทชั้นนำ</div>
+                        <div class="spec-value">NuScale, X-Energy</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สถานะ</div>
+                        <span class="badge neutral">กำลังพัฒนา</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Molten Salt Reactors -->
+            <div class="tech-card molten-salt" data-status="development">
+                <div class="tech-card-header">
+                    🔥 Molten Salt Reactors
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">กำลังผลิต</div>
+                        <div class="spec-value">100-500 MW</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สารทำความเย็น</div>
+                        <div class="spec-value">Molten Salt</div>
+                        <span class="badge pro">ไม่ต้องแรงดันสูง</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">อุณหภูมิ</div>
+                        <div class="spec-value">700°C+</div>
+                        <span class="badge pro">ประสิทธิภาพสูง</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ความปลอดภัย</div>
+                        <div class="spec-value">Passive Shutdown</div>
+                        <span class="badge pro">ปลอดภัยกว่า</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">บริษัทชั้นนำ</div>
+                        <div class="spec-value">Kairos Power</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Timeline</div>
+                        <div class="spec-value">Demo 2027</div>
+                        <span class="badge neutral">กำลังพัฒนา</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sodium-Cooled -->
+            <div class="tech-card sodium" data-status="commercial">
+                <div class="tech-card-header">
+                    🇨🇳 Sodium-Cooled Fast Reactors
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">กำลังผลิต</div>
+                        <div class="spec-value">200-800 MW</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สารทำความเย็น</div>
+                        <div class="spec-value">Sodium</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ประเทศผู้นำ</div>
+                        <div class="spec-value">จีน, รัสเซีย</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ต้นทุนต่อ kW</div>
+                        <div class="spec-value">$2,000-3,000</div>
+                        <span class="badge pro">ถูกที่สุด</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">บริษัทชั้นนำ</div>
+                        <div class="spec-value">CNNC (จีน)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Timeline</div>
+                        <div class="spec-value">2025 (Q1-Q2)</div>
+                        <span class="badge pro">พร้อมเร็วสุด</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Micro Reactors -->
+            <div class="tech-card micro" data-status="experimental">
+                <div class="tech-card-header">
+                    📦 Micro-Reactors
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">กำลังผลิต</div>
+                        <div class="spec-value">1-10 MW</div>
+                        <span class="badge pro">ขนาดเล็กสุด</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ขนาดภาชนะ</div>
+                        <div class="spec-value">20-ft Container</div>
+                        <span class="badge pro">เคลื่อนย้ายได้</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">การใช้งาน</div>
+                        <div class="spec-value">Military, Remote</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">บริษัทชั้นนำ</div>
+                        <div class="spec-value">BWXT (Project Pele)</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">ลูกค้า</div>
+                        <div class="spec-value">US DoD</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สถานะ</div>
+                        <span class="badge neutral">ทดลอง</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- HALEU Fuel Reactors -->
+            <div class="tech-card haleu" data-status="development">
+                <div class="tech-card-header">
+                    ⚗️ HALEU Fuel Reactors
+                </div>
+                <div class="tech-card-body">
+                    <div class="spec-item">
+                        <div class="spec-label">Enrichment</div>
+                        <div class="spec-value">5-20% U-235</div>
+                        <span class="badge pro">ประสิทธิภาพสูง</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Burn-up Rate</div>
+                        <div class="spec-value">สูงกว่ามาก</div>
+                        <span class="badge pro">ใช้เชื้อเพลิงน้อยกว่า</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Supply Chain</div>
+                        <div class="spec-value">รัสเซีย (Monopoly)</div>
+                        <span class="badge con">ปัญหา Geopolitics</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">US Production</div>
+                        <div class="spec-value">Centrus Energy</div>
+                        <span class="badge neutral">กำลังสร้าง</span>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">DOE Stockpile</div>
+                        <div class="spec-value">ชั่วคราว</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">สถานะ</div>
+                        <span class="badge neutral">Supply Chain Risk</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Comparison Matrix -->
+        <div class="comparison-matrix">
+            <h3 class="matrix-title">📊 Comparison Matrix</h3>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>เทคโนโลยี</th>
+                        <th>ความปลอดภัย</th>
+                        <th>ต้นทุน</th>
+                        <th>เวลาก่อสร้าง</th>
+                        <th>ความพร้อม</th>
+                        <th>ความเสี่ยง</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Conventional</strong></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td><strong>SMRs</strong></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Molten Salt</strong></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sodium (China)</strong></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Micro-Reactors</strong></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star"></div><div class="star"></div><div class="star"></div><div class="star"></div></div></td>
+                        <td><div class="rating"><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div><div class="star filled"></div></div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Timeline -->
+        <div class="timeline-container">
+            <h3 class="matrix-title">🗓️ Development Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2025</div>
+                    <div class="timeline-content">
+                        <h4>🇨🇳 จีน - Commercial SMR Launch</h4>
+                        <p>Chinese National Nuclear Corporation วางแผนเปิดโรงไฟฟ้า SMR เชิงพาณิชย์แห่งแรก (Sodium gas reactor) ในช่วงครึ่งปีแรกของปี 2025</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2027</div>
+                    <div class="timeline-content">
+                        <h4>🇺🇸 Kairos Power - Demonstration Reactor</h4>
+                        <p>Kairos Power กำหนดเปิด demonstration reactor ของ molten salt technology - จุดเปลี่ยนสำคัญสำหรับเทคโนโลยีในสหรัฐฯ</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2028</div>
+                    <div class="timeline-content">
+                        <h4>🔌 First Commercial Electricity Generation</h4>
+                        <p>Kairos Power คาดว่าจะเริ่มผลิตไฟฟ้าเชิงพาณิชย์จริง - เครื่องปฏิกรณ์ molten salt แห่งแรกที่จ่ายไฟเข้าเครือข่าย</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-year">2030+</div>
+                    <div class="timeline-content">
+                        <h4>📈 Mass Production Era</h4>
+                        <p>SMRs เริ่มแพร่หลาย ต้นทุนลดลง 40% จาก mass production - จุดเริ่มต้นของยุคนิวเคลียร์รุ่นใหม่</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function filterTech(status) {
+            const cards = document.querySelectorAll('.tech-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cards
+            cards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    if (card.dataset.status === status) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        // Add click animation to cards
+        document.querySelectorAll('.tech-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                document.querySelectorAll('.tech-card').forEach(c => c.classList.remove('selected'));
+                // Add selected class to clicked card
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclear Cost Analysis Tool | เครื่องมือวิเคราะห์ต้นทุน</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .cost-bar {
+            margin-bottom: 20px;
+        }
+        
+        .cost-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .cost-bar-label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .cost-bar-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .cost-bar-visual {
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .cost-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+        
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .result-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .comparison-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .comparison-item-label {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 10px;
+        }
+        
+        .comparison-item-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .comparison-item-unit {
+            font-size: 0.8em;
+            color: #a0aec0;
+        }
+        
+        .info-box {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+        
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Nuclear Cost Analysis Tool</h1>
+        <p class="subtitle">เครื่องมือวิเคราะห์และเปรียบเทียบต้นทุนพลังงานนิวเคลียร์</p>
+        
+        <div class="grid-2">
+            <!-- Cost Comparison Chart -->
+            <div class="card">
+                <h3>📊 Capital Cost Comparison ($/kW)</h3>
+                <div class="cost-bar">
+                    <div class="cost-bar-header">
+                        <span class="cost-bar-label">🇺🇸 US Conventional (Vogtle)</span>
+                        <span class="cost-bar-value">$15,000</span>
+                    </div>
+                    <div class="cost-bar-visual">
+                        <div class="cost-bar-fill" style="width: 100%;">แพงที่สุด</div>
+                    </div>
+                </div>
+                
+                <div class="cost-bar">
+                    <div class="cost-bar-header">
+                        <span class="cost-bar-label">SMRs (FOAK)</span>
+                        <span class="cost-bar-value">$6,000-10,000</span>
+                    </div>
+                    <div class="cost-bar-visual">
+                        <div class="cost-bar-fill" style="width: 53%; background: linear-gradient(90deg, #ed8936 0%, #dd6b20 100%);">40% ถูกกว่า</div>
+                    </div>
+                </div>
+                
+                <div class="cost-bar">
+                    <div class="cost-bar-header">
+                        <span class="cost-bar-label">SMRs (After Scale-up)</span>
+                        <span class="cost-bar-value">$3,600-6,000</span>
+                    </div>
+                    <div class="cost-bar-visual">
+                        <div class="cost-bar-fill" style="width: 32%; background: linear-gradient(90deg, #9f7aea 0%, #805ad5 100%);">60% ถูกกว่า</div>
+                    </div>
+                </div>
+                
+                <div class="cost-bar">
+                    <div class="cost-bar-header">
+                        <span class="cost-bar-label">🇨🇳 China Conventional</span>
+                        <span class="cost-bar-value">$2,000-3,000</span>
+                    </div>
+                    <div class="cost-bar-visual">
+                        <div class="cost-bar-fill" style="width: 17%; background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);">83% ถูกกว่า</div>
+                    </div>
+                </div>
+                
+                <div class="cost-bar">
+                    <div class="cost-bar-header">
+                        <span class="cost-bar-label">⚡ Natural Gas</span>
+                        <span class="cost-bar-value">$1,600</span>
+                    </div>
+                    <div class="cost-bar-visual">
+                        <div class="cost-bar-fill" style="width: 11%; background: linear-gradient(90deg, #4299e1 0%, #3182ce 100%);">89% ถูกกว่า</div>
+                    </div>
+                </div>
+                
+                <div class="info-box" style="margin-top: 20px;">
+                    <h4>📌 หมายเหตุ:</h4>
+                    <ul>
+                        <li>ราคาปรับตาม inflation แล้ว</li>
+                        <li>FOAK = First-of-a-kind</li>
+                        <li>ไม่รวมต้นทุนดำเนินงาน</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Interactive Calculator -->
+            <div class="card">
+                <h3>🧮 Investment Calculator</h3>
+                <div class="calculator">
+                    <div class="input-group">
+                        <label for="reactorType">เลือกประเภทเครื่องปฏิกรณ์:</label>
+                        <select id="reactorType" onchange="calculateCost()">
+                            <option value="15000">US Conventional - $15,000/kW</option>
+                            <option value="8000" selected>SMR (FOAK) - $8,000/kW</option>
+                            <option value="4800">SMR (Scaled) - $4,800/kW</option>
+                            <option value="2500">China Conventional - $2,500/kW</option>
+                            <option value="1600">Natural Gas - $1,600/kW</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="capacity">กำลังผลิต (MW): <span id="capacityValue">300</span></label>
+                        <input type="range" id="capacity" class="slider" min="1" max="2000" value="300" oninput="updateCapacity(); calculateCost()">
+                        <small style="color: #718096;">1 MW - 2,000 MW</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="quantity">จำนวนเครื่องปฏิกรณ์: <span id="quantityValue">1</span></label>
+                        <input type="range" id="quantity" class="slider" min="1" max="10" value="1" oninput="updateQuantity(); calculateCost()">
+                        <small style="color: #718096;">1 - 10 เครื่อง</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="lifetime">อายุการใช้งาน (ปี): <span id="lifetimeValue">60</span></label>
+                        <input type="range" id="lifetime" class="slider" min="20" max="80" value="60" oninput="updateLifetime(); calculateCost()">
+                        <small style="color: #718096;">20 - 80 ปี</small>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h4>💵 ผลการคำนวณ</h4>
+                    <div class="result-item">
+                        <span>Total Capital Cost:</span>
+                        <span class="result-value" id="totalCost">$2,400M</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Cost per Reactor:</span>
+                        <span class="result-value" id="perReactor">$2,400M</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Annual Depreciation:</span>
+                        <span class="result-value" id="annualDep">$40M/year</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Total Capacity:</span>
+                        <span class="result-value" id="totalCapacity">300 MW</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Lifetime Cost Comparison -->
+        <div class="card">
+            <h3>📈 Lifetime Cost Analysis</h3>
+            <canvas id="lifetimeCostChart"></canvas>
+        </div>
+        
+        <!-- Operating Cost Comparison -->
+        <div class="card">
+            <h3>⚙️ Operating Cost Comparison</h3>
+            <div class="comparison-grid">
+                <div class="comparison-item">
+                    <div class="comparison-item-label">Nuclear (ต่อ MWh)</div>
+                    <div class="comparison-item-value">$30-35</div>
+                    <div class="comparison-item-unit">ต่ำสุด</div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-item-label">Natural Gas</div>
+                    <div class="comparison-item-value">$40-60</div>
+                    <div class="comparison-item-unit">ขึ้นกับราคาก๊าซ</div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-item-label">Solar + Storage</div>
+                    <div class="comparison-item-value">$50-80</div>
+                    <div class="comparison-item-unit">แพงกว่า</div>
+                </div>
+                <div class="comparison-item">
+                    <div class="comparison-item-label">Wind + Storage</div>
+                    <div class="comparison-item-value">$45-70</div>
+                    <div class="comparison-item-unit">แปรผัน</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Key Insights -->
+        <div class="info-box">
+            <h4>💡 Key Cost Insights:</h4>
+            <ul>
+                <li><strong>Capital Cost สูง แต่ Operating Cost ต่ำ:</strong> นิวเคลียร์มีต้นทุนก่อสร้างสูง แต่ดำเนินการถูก → คุ้มค่าระยะยาว</li>
+                <li><strong>จีนสร้างถูกกว่ามาก:</strong> $2,000-3,000/kW vs US $15,000/kW → โอกาสลงทุนในหุ้นจีน</li>
+                <li><strong>SMRs ลดต้นทุนได้ 40-60%:</strong> หลังจาก mass production → เป้าหมาย 2030s</li>
+                <li><strong>Gas ถูกกว่าแต่ไม่สะอาด:</strong> $1,600/kW แต่ปล่อย CO2 และต้นทุนเชื้อเพลิงผันผวน</li>
+                <li><strong>Break-even point:</strong> นิวเคลียร์คุ้มค่ากว่าก๊าซธรรมชาติหลังปีที่ 15-20</li>
+            </ul>
+        </div>
+        
+        <!-- Investment Implications -->
+        <div class="info-box" style="margin-top: 20px; border-left-color: #48bb78;">
+            <h4>📈 Investment Implications:</h4>
+            <ul>
+                <li><strong>SMR Developers:</strong> ต้นทุนลดลง → margin สูงขึ้น → growth potential</li>
+                <li><strong>Chinese Nuclear Companies:</strong> Cost advantage → ครองตลาดโลก</li>
+                <li><strong>Construction & Engineering:</strong> โครงการมูลค่าสูง → revenue มหาศาล</li>
+                <li><strong>Utilities:</strong> ROI ระยะยาว 20-30 ปี → เหมาะนักลงทุนระยะยาว</li>
+                <li><strong>Supply Chain:</strong> ทุกส่วนของ value chain จะได้ประโยชน์</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function updateCapacity() {
+            document.getElementById('capacityValue').textContent = document.getElementById('capacity').value;
+        }
+        
+        function updateQuantity() {
+            document.getElementById('quantityValue').textContent = document.getElementById('quantity').value;
+        }
+        
+        function updateLifetime() {
+            document.getElementById('lifetimeValue').textContent = document.getElementById('lifetime').value;
+        }
+        
+        function calculateCost() {
+            const costPerKW = parseInt(document.getElementById('reactorType').value);
+            const capacityMW = parseInt(document.getElementById('capacity').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const lifetime = parseInt(document.getElementById('lifetime').value);
+            
+            const capacityKW = capacityMW * 1000;
+            const totalCostPerReactor = (costPerKW * capacityKW) / 1000000; // in millions
+            const totalCost = totalCostPerReactor * quantity;
+            const annualDep = totalCost / lifetime;
+            const totalCapacityMW = capacityMW * quantity;
+            
+            document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(0) + 'M';
+            document.getElementById('perReactor').textContent = '$' + totalCostPerReactor.toFixed(0) + 'M';
+            document.getElementById('annualDep').textContent = '$' + annualDep.toFixed(1) + 'M/year';
+            document.getElementById('totalCapacity').textContent = totalCapacityMW + ' MW';
+        }
+        
+        // Lifetime Cost Chart
+        const ctx = document.getElementById('lifetimeCostChart').getContext('2d');
+        const lifetimeCostChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Year 0', '5', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55', '60'],
+                datasets: [
+                    {
+                        label: 'Nuclear (Total Cost)',
+                        data: [15000, 15150, 15300, 15450, 15600, 15750, 15900, 16050, 16200, 16350, 16500, 16650, 16800],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Natural Gas (Total Cost)',
+                        data: [1600, 3400, 5200, 7000, 8800, 10600, 12400, 14200, 16000, 17800, 19600, 21400, 23200],
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Solar + Storage',
+                        data: [5000, 6500, 8000, 9500, 11000, 12500, 14000, 15500, 17000, 18500, 20000, 21500, 23000],
+                        borderColor: '#ed8936',
+                        backgroundColor: 'rgba(237, 137, 54, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.parsed.y + '/kW';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cumulative Cost ($/kW)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Years'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Initialize calculator
+        calculateCost();
+    </script>
+</body>
+</html>

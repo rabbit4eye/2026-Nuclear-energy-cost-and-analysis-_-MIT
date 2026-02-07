@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk vs Opportunity Matrix | วิเคราะห์ความเสี่ยงและโอกาส</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .matrix-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            background: white;
+            border-radius: 10px;
+        }
+        
+        .matrix-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .matrix-point {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .matrix-point:hover {
+            transform: scale(1.3);
+            z-index: 100;
+        }
+        
+        .matrix-point.opportunity {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .matrix-point.risk {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+        
+        .matrix-point.balanced {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+        
+        .risk-list {
+            margin-top: 20px;
+        }
+        
+        .risk-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f56565;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .opportunity-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #48bb78;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .item-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+        
+        .severity-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .severity-high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .severity-medium {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .severity-low {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .item-description {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .impact-bar {
+            margin-top: 10px;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .impact-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .impact-bar-fill.high {
+            background: linear-gradient(90deg, #f56565 0%, #e53e3e 100%);
+        }
+        
+        .impact-bar-fill.medium {
+            background: linear-gradient(90deg, #ed8936 0%, #dd6b20 100%);
+        }
+        
+        .impact-bar-fill.low {
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .score-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            max-width: 250px;
+        }
+        
+        .decision-matrix {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .decision-cell {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .decision-cell h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .decision-cell.buy {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .decision-cell.hold {
+            border-color: #ed8936;
+            background: #fffaf0;
+        }
+        
+        .decision-cell.avoid {
+            border-color: #f56565;
+            background: #fff5f5;
+        }
+
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .decision-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚖️ Risk vs Opportunity Matrix</h1>
+        <p class="subtitle">วิเคราะห์ความเสี่ยงและโอกาสการลงทุนพลังงานนิวเคลียร์</p>
+        
+        <!-- Overall Scores -->
+        <div class="grid-2">
+            <div class="score-card">
+                <div class="score-label">Overall Opportunity Score</div>
+                <div class="score-value">7.5/10</div>
+                <p style="margin-top: 10px; opacity: 0.9;">Mega trend + China leadership + Supply chain</p>
+            </div>
+            
+            <div class="score-card" style="background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);">
+                <div class="score-label">Overall Risk Score</div>
+                <div class="score-value">6.8/10</div>
+                <p style="margin-top: 10px; opacity: 0.9;">High costs + Long timeline + Technology uncertainty</p>
+            </div>
+        </div>
+        
+        <!-- Risk-Opportunity Chart -->
+        <div class="card" style="margin-top: 30px;">
+            <h3>📊 Risk-Opportunity Scatter Plot</h3>
+            <canvas id="scatterChart"></canvas>
+        </div>
+        
+        <!-- Opportunities List -->
+        <div class="card" style="margin-top: 30px;">
+            <h3>✅ Key Opportunities (โอกาส)</h3>
+            <div class="risk-list">
+                <div class="opportunity-item">
+                    <div class="item-header">
+                        <span class="item-title">1. Mega Trend ระยะยาว 20-30 ปี</span>
+                        <span class="severity-badge severity-low">Impact: สูงมาก</span>
+                    </div>
+                    <div class="item-description">
+                        ความต้องการพลังงานโลกเพิ่มขึ้นจาก AI, EV, Air Conditioning - นิวเคลียร์จะเป็นส่วนสำคัญของ solution
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill low" style="width: 95%"></div>
+                    </div>
+                </div>
+                
+                <div class="opportunity-item">
+                    <div class="item-header">
+                        <span class="item-title">2. จีนเป็นผู้นำอุตสาหกรรม</span>
+                        <span class="severity-badge severity-low">Impact: สูงมาก</span>
+                    </div>
+                    <div class="item-description">
+                        ต้นทุน $2,000-3,000/kW vs สหรัฐ $15,000/kW - โอกาสลงทุนในหุ้นจีน (CGN, CNNC) มีศักยภาพสูง
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill low" style="width: 90%"></div>
+                    </div>
+                </div>
+                
+                <div class="opportunity-item">
+                    <div class="item-header">
+                        <span class="item-title">3. Supply Chain Opportunities</span>
+                        <span class="severity-badge severity-medium">Impact: สูง</span>
+                    </div>
+                    <div class="item-description">
+                        HALEU fuel, molten salt, construction materials - ทุกส่วนของ value chain จะได้ประโยชน์
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill medium" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div class="opportunity-item">
+                    <div class="item-header">
+                        <span class="item-title">4. Big Tech Commitment</span>
+                        <span class="severity-badge severity-medium">Impact: สูง</span>
+                    </div>
+                    <div class="item-description">
+                        Microsoft, Amazon, Google ลงทุนจริงจัง - $300B CapEx ในปี 2025
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill medium" style="width: 80%"></div>
+                    </div>
+                </div>
+                
+                <div class="opportunity-item">
+                    <div class="item-header">
+                        <span class="item-title">5. Cost Reduction Potential</span>
+                        <span class="severity-badge severity-medium">Impact: ปานกลาง</span>
+                    </div>
+                    <div class="item-description">
+                        SMRs สามารถลดต้นทุนได้ 40-60% หลัง mass production ในช่วง 2030s
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill medium" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Risks List -->
+        <div class="card" style="margin-top: 30px;">
+            <h3>⚠️ Key Risks (ความเสี่ยง)</h3>
+            <div class="risk-list">
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">1. ต้นทุนก่อสร้างสูงมาก</span>
+                        <span class="severity-badge severity-high">Severity: สูง</span>
+                    </div>
+                    <div class="item-description">
+                        SMRs $6,000-10,000/kW vs ก๊าซ $1,600/kW - แพงกว่ามาก และมีประวัติ cost overruns
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill high" style="width: 90%"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">2. Timeline ยาวนาน</span>
+                        <span class="severity-badge severity-high">Severity: สูง</span>
+                    </div>
+                    <div class="item-description">
+                        ต้องใช้เวลา 5-15 ปี ถึงจะเห็นผล - ไม่ใช่ quick fix สำหรับความต้องการ AI ตอนนี้
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill high" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">3. Regulatory & Safety Risks</span>
+                        <span class="severity-badge severity-high">Severity: สูงมาก</span>
+                    </div>
+                    <div class="item-description">
+                        Trump admin ผ่อนปรนกฎความปลอดภัย - เสี่ยงอุบัติเหตุ → อุตสาหกรรมทั้งหมดเสียหาย
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill high" style="width: 95%"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">4. Technology Uncertainty</span>
+                        <span class="severity-badge severity-medium">Severity: ปานกลาง</span>
+                    </div>
+                    <div class="item-description">
+                        Molten salt, materials science - ปัญหาจากยุค 1960s ยังไม่หมด เทคโนโลยีอาจล้มเหลว
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill medium" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">5. Competition from Renewables</span>
+                        <span class="severity-badge severity-medium">Severity: ปานกลาง</span>
+                    </div>
+                    <div class="item-description">
+                        Solar + Wind + Storage ถูกกว่าและสร้างเร็วกว่า - ถ้าต้นทุน storage ลงเร็ว nuclear ไม่แข่งได้
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill medium" style="width: 70%"></div>
+                    </div>
+                </div>
+                
+                <div class="risk-item">
+                    <div class="item-header">
+                        <span class="item-title">6. Nuclear Waste Problem</span>
+                        <span class="severity-badge severity-low">Severity: ต่ำ-ปานกลาง</span>
+                    </div>
+                    <div class="item-description">
+                        SMRs หลายแห่ง = ขยะกระจาย, สหรัฐไม่มีที่เก็บถาวร - ปัญหาทางการเมืองและสังคม
+                    </div>
+                    <div class="impact-bar">
+                        <div class="impact-bar-fill low" style="width: 50%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decision Matrix -->
+        <div class="decision-matrix">
+            <h3 style="color: #2d3748; margin-bottom: 20px;">🎯 Investment Decision Matrix</h3>
+            <div class="decision-grid">
+                <div class="decision-cell buy">
+                    <h4>✅ BUY / STRONG BUY</h4>
+                    <ul style="text-align: left; margin-left: 20px; color: #22543d; font-size: 0.95em;">
+                        <li>หุ้นจีน (CGN, CNNC)</li>
+                        <li>Uranium miners (Cameco)</li>
+                        <li>Big Tech (Microsoft)</li>
+                        <li>Nuclear ETFs (URA, URNM)</li>
+                    </ul>
+                </div>
+                
+                <div class="decision-cell hold">
+                    <h4>⚖️ HOLD / SELECTIVE BUY</h4>
+                    <ul style="text-align: left; margin-left: 20px; color: #c05621; font-size: 0.95em;">
+                        <li>SMR developers (Kairos, X-Energy)</li>
+                        <li>Utilities (Constellation)</li>
+                        <li>Construction (Fluor, Bechtel)</li>
+                        <li>HALEU producers (Centrus)</li>
+                    </ul>
+                </div>
+                
+                <div class="decision-cell avoid">
+                    <h4>⛔ AVOID / HIGH RISK</h4>
+                    <ul style="text-align: left; margin-left: 20px; color: #c53030; font-size: 0.95em;">
+                        <li>บริษัทที่มีปัญหาด้านต้นทุน (NuScale)</li>
+                        <li>โครงการที่ไม่มี timeline ชัด</li>
+                        <li>Micro-reactor startups</li>
+                        <li>บริษัทที่พึ่งพา US subsidies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Final Recommendation -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin-top: 30px;">
+            <h3 style="margin-bottom: 15px;">💡 Final Recommendation สำหรับนักลงทุนรายย่อย:</h3>
+            <p style="font-size: 1.1em; line-height: 1.8; opacity: 0.95;">
+                นิวเคลียร์รุ่นใหม่เป็น <strong>high-risk, high-reward</strong> investment theme ที่เหมาะกับนักลงทุนที่:
+            </p>
+            <ul style="margin: 20px 0 20px 30px; font-size: 1.05em; line-height: 1.8;">
+                <li>มี <strong>time horizon 5-10 ปี</strong> และลงทุนระยะยาวได้จริง</li>
+                <li>ยอมรับ <strong>ความผันผวนสูง</strong> และความเสี่ยงที่มากกว่าหุ้นทั่วไป</li>
+                <li>จัดสรร <strong>ไม่เกิน 5-10% ของ portfolio</strong> ในธีมนี้</li>
+                <li>มีความรู้และ<strong>ติดตามข่าวสม่ำเสมอ</strong></li>
+            </ul>
+            <p style="font-size: 1.1em; line-height: 1.8; opacity: 0.95;">
+                <strong>แนะนำ:</strong> เริ่มจาก ETFs และ Big Tech ก่อน → ค่อยๆ เพิ่ม exposure ใน individual stocks เมื่อมั่นใจ
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Scatter Plot
+        const ctx = document.getElementById('scatterChart').getContext('2d');
+        const scatterChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'High Opportunity',
+                        data: [
+                            {x: 3, y: 9, name: 'Chinese Nuclear Companies'},
+                            {x: 4, y: 8.5, name: 'Uranium Miners'},
+                            {x: 5, y: 8, name: 'Big Tech'},
+                            {x: 4, y: 7.5, name: 'Nuclear ETFs'}
+                        ],
+                        backgroundColor: 'rgba(72, 187, 120, 0.6)',
+                        borderColor: '#48bb78',
+                        borderWidth: 2,
+                        pointRadius: 10,
+                        pointHoverRadius: 15
+                    },
+                    {
+                        label: 'Balanced',
+                        data: [
+                            {x: 6, y: 7, name: 'SMR Developers'},
+                            {x: 5, y: 6.5, name: 'Utilities'},
+                            {x: 7, y: 6, name: 'Construction Companies'}
+                        ],
+                        backgroundColor: 'rgba(237, 137, 54, 0.6)',
+                        borderColor: '#ed8936',
+                        borderWidth: 2,
+                        pointRadius: 10,
+                        pointHoverRadius: 15
+                    },
+                    {
+                        label: 'High Risk',
+                        data: [
+                            {x: 8, y: 5, name: 'First-of-a-kind SMRs'},
+                            {x: 9, y: 4, name: 'Micro-reactor Startups'},
+                            {x: 7, y: 3, name: 'Struggling Companies'}
+                        ],
+                        backgroundColor: 'rgba(245, 101, 101, 0.6)',
+                        borderColor: '#f56565',
+                        borderWidth: 2,
+                        pointRadius: 10,
+                        pointHoverRadius: 15
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const point = context.raw;
+                                return [
+                                    point.name,
+                                    'Risk: ' + point.x + '/10',
+                                    'Opportunity: ' + point.y + '/10'
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Risk Level (ความเสี่ยง) →',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Opportunity Level (โอกาส) →',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            }
+                        },
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

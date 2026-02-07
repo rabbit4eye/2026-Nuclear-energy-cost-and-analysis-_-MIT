@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Demand Growth Dashboard | การเติบโตความต้องการพลังงาน</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn.active {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .percentage {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        
+        .percentage.high {
+            background: #fed7d7;
+            color: #c53030;
+        }
+        
+        .percentage.medium {
+            background: #feebc8;
+            color: #c05621;
+        }
+        
+        .percentage.low {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .info-box {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .info-box h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+        
+        .info-box li {
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Energy Demand Growth Dashboard</h1>
+        <p class="subtitle">แดชบอร์ดการเติบโตความต้องการพลังงานจาก AI และ Data Centers</p>
+        
+        <!-- Key Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>📈 AI Investment 2025</h3>
+                <div class="value">$300B</div>
+                <div class="label">Capital Expenditure</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>⚡ Data Center Growth</h3>
+                <div class="value">3x</div>
+                <div class="label">เพิ่มขึ้นภายในปี 2030</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>🇺🇸 US Demand Share</h3>
+                <div class="value">50%</div>
+                <div class="label">จาก Data Centers</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>🏭 Single Data Center</h3>
+                <div class="value">100s MW</div>
+                <div class="label">เทียบเท่าเมืองขนาดกลาง</div>
+            </div>
+        </div>
+        
+        <!-- Growth Chart -->
+        <div class="chart-container">
+            <h3 class="chart-title">📊 การเติบโตความต้องการพลังงาน 2020-2030</h3>
+            <div class="controls">
+                <button class="btn active" onclick="updateChart('all')">ภาพรวม</button>
+                <button class="btn" onclick="updateChart('datacenter')">Data Centers อย่างเดียว</button>
+                <button class="btn" onclick="updateChart('comparison')">เปรียบเทียบกับ AC</button>
+            </div>
+            <canvas id="growthChart"></canvas>
+        </div>
+        
+        <!-- Energy Source Breakdown -->
+        <div class="chart-container">
+            <h3 class="chart-title">🔋 แหล่งพลังงานสำหรับ Data Centers</h3>
+            <canvas id="energySourceChart"></canvas>
+        </div>
+        
+        <!-- Comparison Table -->
+        <div class="chart-container">
+            <h3 class="chart-title">⚖️ เปรียบเทียบความต้องการพลังงาน</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>แหล่งความต้องการ</th>
+                        <th>การเติบโตต่อปี</th>
+                        <th>ผลกระทบ 2020-2030</th>
+                        <th>หมายเหตุ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>🖥️ AI Data Centers</td>
+                        <td><span class="percentage high">+12-15%</span></td>
+                        <td>เพิ่มขึ้น 3 เท่า</td>
+                        <td>ความต้องการหลักในสหรัฐฯ</td>
+                    </tr>
+                    <tr>
+                        <td>❄️ Air Conditioning</td>
+                        <td><span class="percentage high">+8-10%</span></td>
+                        <td>มากกว่า Data Centers</td>
+                        <td>ระดับโลก, เพิ่มจากภูมิอากาศ</td>
+                    </tr>
+                    <tr>
+                        <td>🚗 Electric Vehicles</td>
+                        <td><span class="percentage medium">+15-20%</span></td>
+                        <td>เติบโตเร็วแต่ฐานเล็ก</td>
+                        <td>ยังไม่ถึง 10% ของ total</td>
+                    </tr>
+                    <tr>
+                        <td>🏭 Traditional Industry</td>
+                        <td><span class="percentage low">+1-2%</span></td>
+                        <td>เติบโตช้า</td>
+                        <td>ถึงจุดอิ่มตัวในหลายพื้นที่</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Key Insights -->
+        <div class="info-box">
+            <h4>💡 Key Insights ที่สำคัญ:</h4>
+            <ul>
+                <li><strong>Data Centers กินไฟมหาศาล:</strong> แต่ละแห่งใช้ไฟ 100-500 MW (เทียบเท่าเมือง 50,000-250,000 คน)</li>
+                <li><strong>สหรัฐฯเป็นตลาดหลัก:</strong> 50% ของความต้องการไฟฟ้าที่เพิ่มขึ้นมาจาก Data Centers</li>
+                <li><strong>Air Conditioning ยังมากกว่า:</strong> ความต้องการพลังงานจาก AC จะยังสูงกว่า AI ในทศวรรษนี้</li>
+                <li><strong>การลงทุน $300B ในปี 2025:</strong> ส่วนใหญ่เป็นโครงสร้างพื้นฐานและระบบพลังงาน</li>
+                <li><strong>ความเสี่ยง Overbuilding:</strong> ถ้า AI ฟองสบู่แตก อาจมี Data Centers ที่สร้างเกินความต้องการ</li>
+            </ul>
+        </div>
+        
+        <!-- Investment Implications -->
+        <div class="info-box" style="margin-top: 20px; border-left-color: #48bb78;">
+            <h4>📈 Investment Implications (นัยสำหรับการลงทุน):</h4>
+            <ul>
+                <li><strong>ระยะสั้น (1-2 ปี):</strong> ก๊าซธรรมชาติ, โรงไฟฟ้าเดิม → รองรับความต้องการทันที</li>
+                <li><strong>ระยะกลาง (3-5 ปี):</strong> พลังงานหมุนเวียน + Battery Storage → เติบโตเร็ว</li>
+                <li><strong>ระยะยาว (5-10 ปี):</strong> นิวเคลียร์รุ่นใหม่ → Baseload power ที่สะอาด</li>
+                <li><strong>Supply Chain:</strong> ทุกอย่างที่เกี่ยวข้องกับโครงสร้างพลังงานจะเติบโต</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Growth Chart
+        const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+        let growthChart;
+        
+        const chartData = {
+            all: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                datasets: [
+                    {
+                        label: 'Data Centers (TWh)',
+                        data: [200, 230, 265, 305, 350, 400, 460, 530, 610, 700, 600],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Air Conditioning (TWh)',
+                        data: [2000, 2160, 2333, 2520, 2721, 2939, 3174, 3428, 3702, 3998, 4318],
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            datacenter: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                datasets: [
+                    {
+                        label: 'AI/ML Training',
+                        data: [80, 100, 125, 156, 195, 244, 305, 381, 476, 595, 744],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Inference',
+                        data: [60, 72, 86, 103, 124, 149, 179, 214, 257, 309, 370],
+                        borderColor: '#ed64a6',
+                        backgroundColor: 'rgba(237, 100, 166, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Traditional Cloud',
+                        data: [60, 58, 54, 46, 31, 7, -26, -65, -123, -204, -514],
+                        borderColor: '#ed8936',
+                        backgroundColor: 'rgba(237, 137, 54, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            comparison: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+                datasets: [
+                    {
+                        label: 'Data Centers Growth (%)',
+                        data: [0, 15, 15.2, 15.1, 14.8, 14.3, 15, 15.2, 15.1, 14.8, -14.3],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'AC Growth (%)',
+                        data: [0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.2)',
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    }
+                ]
+            }
+        };
+        
+        function createGrowthChart(dataKey) {
+            if (growthChart) {
+                growthChart.destroy();
+            }
+            
+            growthChart = new Chart(ctxGrowth, {
+                type: 'line',
+                data: chartData[dataKey],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: dataKey === 'comparison' ? 'Growth Rate (%)' : 'Energy Consumption (TWh)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Year'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart(type) {
+            // Update button states
+            document.querySelectorAll('.controls .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            createGrowthChart(type);
+        }
+        
+        // Energy Source Chart (Doughnut)
+        const ctxSource = document.getElementById('energySourceChart').getContext('2d');
+        const energySourceChart = new Chart(ctxSource, {
+            type: 'doughnut',
+            data: {
+                labels: ['ก๊าซธรรมชาติ', 'ถ่านหิน', 'นิวเคลียร์ (เดิม)', 'พลังงานหมุนเวียน', 'นิวเคลียร์ (ใหม่)', 'อื่นๆ'],
+                datasets: [{
+                    data: [45, 20, 15, 12, 3, 5],
+                    backgroundColor: [
+                        '#ed8936',
+                        '#4a5568',
+                        '#667eea',
+                        '#48bb78',
+                        '#9f7aea',
+                        '#cbd5e0'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Initialize with 'all' view
+        createGrowthChart('all');
+    </script>
+</body>
+</html>
